@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Schedule an appointment with the bishopric through the ward executive secretary.">
+<title>Meet with the Bishop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: a chapel-foyer notice board. Intro beside an "appointment slip" of office hours,
+     then a grid of interview types that feed a request composer which writes a text to send. */
+  :root {
+    --bg: #f3f4f1;
+    --surface: #ffffff;
+    --ink: #1d2638;
+    --muted: #5d6573;
+    --line: #d9ddd6;
+    --accent: #2f4a7a;
+    --accent-soft: #e4e9f2;
+    --brass: #9a7a3a;
+    --slip: #fbfaf5;
+    --display: "Young Serif", Georgia, "Times New Roman", serif;
+    --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12161f; --surface: #1a2030; --ink: #e8eaee; --muted: #a2a9b6;
+      --line: #2c3446; --accent: #9db6e6; --accent-soft: #24304a; --brass: #d2b072;
+      --slip: #1e2433; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12161f; --surface: #1a2030; --ink: #e8eaee; --muted: #a2a9b6;
+    --line: #2c3446; --accent: #9db6e6; --accent-soft: #24304a; --brass: #d2b072;
+    --slip: #1e2433; color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0;
+    background: var(--bg); color: var(--ink);
+    font-family: var(--body); font-size: 1rem; line-height: 1.6;
+  }
+  .wrap { max-width: 68rem; margin: 0 auto; padding-inline: 1.25rem; padding-block: 0 3rem; }
+  h1, h2, h3 { font-family: var(--display); font-weight: 400; line-height: 1.15; text-wrap: balance; margin: 0; }
+  p { margin: 0; }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .eyebrow {
+    font-family: var(--mono); font-size: .75rem; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--brass);
+  }
+
+  /* Top bar */
+  .topbar {
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;
+    padding-block: 1.25rem; border-bottom: 1px solid var(--line);
+    font-size: .875rem; color: var(--muted);
+  }
+  .topbar strong { color: var(--ink); font-weight: 600; }
+
+  /* Hero */
+  .hero {
+    display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 3rem;
+    align-items: start; padding-block: 3.5rem 3rem;
+  }
+  .hero-text { display: grid; gap: 1.25rem; min-width: 0; }
+  .hero h1 { font-size: clamp(2.4rem, 5.5vw, 3.9rem); }
+  .hero .lede { font-size: 1.15rem; color: var(--muted); max-width: 34rem; }
+  .contact { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: .5rem; }
+  .contact-item {
+    display: flex; align-items: center; gap: .75rem;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+    padding: .6rem .6rem .6rem 1rem; min-width: 0;
+  }
+  .contact-item .k { font-family: var(--mono); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .contact-item .v { font-weight: 600; user-select: all; overflow-wrap: anywhere; }
+  .btn {
+    font: inherit; font-weight: 600; font-size: .875rem; cursor: pointer;
+    border: 1px solid var(--accent); background: transparent; color: var(--accent);
+    border-radius: 4px; padding: .4rem .75rem; white-space: nowrap;
+  }
+  .btn:hover { background: var(--accent-soft); }
+  .btn.primary { background: var(--accent); color: var(--bg); }
+  .btn.primary:hover { filter: brightness(1.1); background: var(--accent); }
+
+  /* Appointment slip */
+  .slip {
+    background: var(--slip); border: 1px solid var(--line); border-radius: 2px;
+    padding: 1.5rem 1.5rem 1.25rem; position: relative;
+    box-shadow: 0 1px 0 var(--line), 0 12px 28px -18px rgba(20, 30, 50, .35);
+  }
+  .slip::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 0; height: 6px;
+    background: repeating-linear-gradient(90deg, var(--brass) 0 10px, transparent 10px 16px);
+    opacity: .55;
+  }
+  .slip h2 { font-size: 1.5rem; margin-top: .35rem; }
+  .slip dl { margin: 1.25rem 0 0; display: grid; gap: 0; }
+  .slip .row {
+    display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 1rem;
+    padding-block: .7rem; border-top: 1px dashed var(--line);
+  }
+  .slip dt { font-family: var(--mono); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: .15rem; }
+  .slip dd { margin: 0; font-variant-numeric: tabular-nums; }
+  .slip dd small { display: block; color: var(--muted); font-size: .85rem; }
+  .slip .note { margin-top: 1rem; font-size: .85rem; color: var(--muted); }
+
+  /* Season banner */
+  .season {
+    display: flex; gap: 1rem; align-items: baseline; flex-wrap: wrap;
+    border-block: 1px solid var(--line); padding-block: 1rem; margin-bottom: 3.5rem;
+  }
+  .season p { flex: 1 1 22rem; min-width: 0; }
+
+  /* Sections */
+  section { margin-bottom: 4rem; }
+  .section-head { display: grid; gap: .5rem; margin-bottom: 1.75rem; max-width: 40rem; }
+  .section-head h2 { font-size: clamp(1.75rem, 3.5vw, 2.4rem); }
+  .section-head p { color: var(--muted); }
+
+  /* Interview types */
+  .types { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  .type {
+    background: var(--surface); padding: 1.25rem; display: grid; gap: .5rem; align-content: start;
+    text-align: left; font: inherit; color: inherit; border: 0; cursor: pointer;
+  }
+  .type:hover { background: var(--accent-soft); }
+  .type[aria-pressed="true"] { background: var(--accent-soft); box-shadow: inset 0 0 0 2px var(--accent); }
+  .type h3 { font-size: 1.2rem; }
+  .type .who { font-family: var(--mono); font-size: .75rem; color: var(--brass); letter-spacing: .04em; }
+  .type p { font-size: .925rem; color: var(--muted); }
+  .type .len { font-family: var(--mono); font-size: .75rem; color: var(--muted); }
+
+  /* Request composer */
+  .composer { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; align-items: start; }
+  form { display: grid; gap: 1.1rem; }
+  label, legend { font-weight: 600; font-size: .9rem; }
+  .field { display: grid; gap: .35rem; }
+  input[type="text"], select, textarea {
+    font: inherit; color: var(--ink); background: var(--surface);
+    border: 1px solid var(--line); border-radius: 4px; padding: .6rem .75rem; width: 100%;
+  }
+  textarea { min-height: 5rem; resize: vertical; }
+  fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: .5rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .chip { position: relative; }
+  .chip input { position: absolute; opacity: 0; pointer-events: none; }
+  .chip span {
+    display: inline-block; padding: .35rem .8rem; border: 1px solid var(--line); border-radius: 999px;
+    font-size: .875rem; cursor: pointer; background: var(--surface);
+  }
+  .chip input:checked + span { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .chip input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .preview {
+    background: var(--slip); border: 1px solid var(--line); border-radius: 2px; padding: 1.5rem;
+    display: grid; gap: 1rem; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 1rem);
+  }
+  .preview .msg {
+    font-family: var(--mono); font-size: .9rem; line-height: 1.65; white-space: pre-wrap;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 1rem;
+    min-height: 8rem; overflow-wrap: anywhere;
+  }
+  .preview .actions { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; }
+  .status { font-size: .85rem; color: var(--muted); }
+
+  /* FAQ */
+  .faq { display: grid; gap: 0; border-top: 1px solid var(--line); max-width: 46rem; }
+  details { border-bottom: 1px solid var(--line); padding-block: 1rem; }
+  summary { cursor: pointer; font-weight: 600; font-size: 1.05rem; }
+  details p { margin-top: .6rem; color: var(--muted); max-width: 40rem; }
+
+  footer {
+    border-top: 1px solid var(--line); padding-top: 1.5rem; font-size: .85rem; color: var(--muted);
+    display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  }
+
+  @media (max-width: 760px) {
+    .hero, .composer { grid-template-columns: 1fr; gap: 2rem; }
+    .hero { padding-block: 2rem; }
+    .preview { position: static; }
+    .slip .row { grid-template-columns: 6rem minmax(0, 1fr); }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="topbar">
+    <span><strong data-cfg="ward"></strong> · Executive Secretary</span>
+    <span data-cfg="building"></span>
+  </header>
+
+  <div class="hero">
+    <div class="hero-text">
+      <span class="eyebrow">Bishopric appointments</span>
+      <h1>Need time with the bishop? I can set that up.</h1>
+      <p class="lede">I'm <span data-cfg="name"></span>, the ward executive secretary. I keep the bishopric's calendar for interviews, temple recommends, youth interviews, tithing declaration, and personal visits. Send me a text and I'll find you a time.</p>
+      <div class="contact">
+        <div class="contact-item">
+          <div><div class="k">Text or call</div><div class="v" id="phone-val" data-cfg="phone"></div></div>
+          <button class="btn" type="button" data-copy="phone">Copy</button>
+        </div>
+        <div class="contact-item">
+          <div><div class="k">Email</div><div class="v" data-cfg="email"></div></div>
+          <button class="btn" type="button" data-copy="email">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="slip" aria-labelledby="hours-title">
+      <span class="eyebrow">Office hours</span>
+      <h2 id="hours-title">When the bishopric meets with members</h2>
+      <dl id="hours"></dl>
+      <p class="note">Appointments are usually 10–20 minutes. Please arrive a few minutes early and wait in the foyer outside the bishop's office.</p>
+    </aside>
+  </div>
+
+  <div class="season" id="season" hidden>
+    <span class="eyebrow" id="season-tag"></span>
+    <p id="season-text"></p>
+  </div>
+
+  <section id="types" aria-labelledby="types-title">
+    <div class="section-head">
+      <span class="eyebrow">What to schedule</span>
+      <h2 id="types-title">Common appointments</h2>
+      <p>Pick one to start a request below. Each card says who usually meets with you and what to bring.</p>
+    </div>
+    <div class="types" id="type-grid"></div>
+  </section>
+
+  <section id="request" aria-labelledby="request-title">
+    <div class="section-head">
+      <span class="eyebrow">Request a time</span>
+      <h2 id="request-title">Write your request</h2>
+      <p>Fill this in and copy the message into a text to me. Nothing is sent or saved from this page.</p>
+    </div>
+    <div class="composer">
+      <form id="req-form" autocomplete="on">
+        <div class="field">
+          <label for="f-name">Your name</label>
+          <input type="text" id="f-name" placeholder="Sister Jensen" autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="f-type">Appointment</label>
+          <select id="f-type"></select>
+        </div>
+        <div class="field">
+          <label for="f-who">Who is coming</label>
+          <select id="f-who">
+            <option value="">Just me</option>
+            <option value="with my spouse">Me and my spouse</option>
+            <option value="with my family">Our family</option>
+            <option value="for my child">For my child (with a parent)</option>
+          </select>
+        </div>
+        <fieldset>
+          <legend>Times that work for you</legend>
+          <div class="chips" id="f-times"></div>
+        </fieldset>
+        <div class="field">
+          <label for="f-notes">Anything else (optional)</label>
+          <textarea id="f-notes" placeholder="e.g. My recommend expires at the end of next month."></textarea>
+        </div>
+      </form>
+
+      <div class="preview" aria-live="polite">
+        <span class="eyebrow">Your message</span>
+        <div class="msg" id="msg"></div>
+        <div class="actions">
+          <button class="btn primary" type="button" id="copy-msg">Copy message</button>
+          <a class="btn" id="sms-link" href="#">Open in Messages</a>
+          <span class="status" id="copy-status"></span>
+        </div>
+        <p class="status">Send it to <strong data-cfg="phone"></strong>. If the Messages link doesn't open on your device, copy the message and paste it into a new text.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" aria-labelledby="faq-title">
+    <div class="section-head">
+      <span class="eyebrow">Good to know</span>
+      <h2 id="faq-title">Questions I get a lot</h2>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>Can a counselor do my temple recommend interview?</summary>
+        <p>Yes. Any member of the bishopric can do the ward interview. You'll then need a second interview with a member of the stake presidency. I can help you schedule both.</p>
+      </details>
+      <details>
+        <summary>What if I need to talk to the bishop about something private?</summary>
+        <p>Just ask for "a few minutes with the bishop." You don't need to tell me why. I only keep the calendar.</p>
+      </details>
+      <details>
+        <summary>How much notice do you need?</summary>
+        <p>A few days is ideal, and Sunday slots fill first. If it's urgent, say so in your text and I'll let the bishop know right away.</p>
+      </details>
+      <details>
+        <summary>I need an ecclesiastical endorsement for school. What do I do?</summary>
+        <p>Start the endorsement online through your school's process first, then schedule an interview with the bishop. Bring your recommend if you have one.</p>
+      </details>
+      <details>
+        <summary>I can't make my appointment. Should I just not show up?</summary>
+        <p>Please text me as soon as you know, even last minute. Someone else may be able to take your slot.</p>
+      </details>
+    </div>
+  </section>
+
+  <footer>
+    <span>A personal page from <span data-cfg="name"></span>, executive secretary, <span data-cfg="ward"></span>.</span>
+    <span>Not an official site of The Church of Jesus Christ of Latter-day Saints. Visit <a href="https://www.churchofjesuschrist.org" target="_blank" rel="noopener">churchofjesuschrist.org</a>.</span>
+  </footer>
+</div>
+
+<script>
+  // ---- Edit these details for your ward ----
+  const CONFIG = {
+    name: "Brother Martineau",
+    ward: "Your Ward Name",
+    building: "Meetinghouse address",
+    phone: "(555) 555-0123",
+    email: "you@example.com",
+    hours: [
+      { day: "Sunday", time: "8:00 – 9:00 am", note: "Before sacrament meeting" },
+      { day: "Sunday", time: "12:00 – 1:30 pm", note: "After the second hour" },
+      { day: "Wednesday", time: "7:00 – 9:00 pm", note: "Evening interviews" },
+    ],
+  };
+
+  const TYPES = [
+    { id: "recommend", title: "Temple recommend", who: "Any bishopric member", len: "~15 min",
+      text: "New or renewal. A stake presidency interview follows. Bring your current recommend if you have one." },
+    { id: "youth", title: "Youth interview", who: "Bishop or counselor", len: "~15 min",
+      text: "Youth meet with the bishopric twice a year, including once with the bishop. Parents are welcome to schedule for their kids." },
+    { id: "tithing", title: "Tithing declaration", who: "Bishop", len: "~10 min",
+      text: "A short year-end visit to confirm your tithing status. Families can come together." },
+    { id: "endorsement", title: "Ecclesiastical endorsement", who: "Bishop", len: "~15 min",
+      text: "For BYU and other Church schools. Start the online form first, then schedule." },
+    { id: "patriarchal", title: "Patriarchal blessing recommend", who: "Bishop", len: "~20 min",
+      text: "A first step toward receiving your patriarchal blessing. Ask about next steps with the stake patriarch." },
+    { id: "baptism", title: "Baptism interview", who: "Bishop", len: "~15 min",
+      text: "For children turning 8. A parent comes along. Schedule a few weeks before the baptism date." },
+    { id: "mission", title: "Mission papers", who: "Bishop, then stake president", len: "~30 min",
+      text: "To start or finish missionary recommendation interviews. Have your online papers in progress." },
+    { id: "personal", title: "Time with the bishop", who: "Bishop", len: "15–30 min",
+      text: "Counsel, a hard week, a question you've been carrying. You don't need to give a reason." },
+  ];
+
+  const TIMES = ["Sunday morning", "Sunday afternoon", "Weekday evening", "Anytime"];
+
+  const $ = (s) => document.querySelector(s);
+  document.querySelectorAll("[data-cfg]").forEach((el) => { el.textContent = CONFIG[el.dataset.cfg] ?? ""; });
+
+  // Office hours
+  $("#hours").innerHTML = CONFIG.hours.map((h) => `
+    <div class="row"><dt>${h.day}</dt><dd>${h.time}<small>${h.note}</small></dd></div>`).join("");
+
+  // Season banner (tithing declaration runs Nov–Dec; give a heads-up in October)
+  (() => {
+    const m = new Date().getMonth();
+    if (m < 9) return;
+    $("#season").hidden = false;
+    $("#season-tag").textContent = m === 9 ? "Coming up" : "Now scheduling";
+    $("#season-text").textContent = m === 9
+      ? "Tithing declaration starts next month. Families can text me now to reserve a time in November or December."
+      : "Tithing declaration is happening now. Text me to get your family on the bishop's calendar before the end of the year.";
+  })();
+
+  // Interview types + select
+  const grid = $("#type-grid"), sel = $("#f-type");
+  sel.innerHTML = TYPES.map((t) => `<option value="${t.id}">${t.title}</option>`).join("");
+  grid.innerHTML = TYPES.map((t) => `
+    <button type="button" class="type" data-id="${t.id}" aria-pressed="false">
+      <span class="who">${t.who}</span>
+      <h3>${t.title}</h3>
+      <p>${t.text}</p>
+      <span class="len">${t.len}</span>
+    </button>`).join("");
+  grid.addEventListener("click", (e) => {
+    const b = e.target.closest(".type"); if (!b) return;
+    sel.value = b.dataset.id; sync();
+    $("#request").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  });
+
+  // Time chips
+  $("#f-times").innerHTML = TIMES.map((t, i) => `
+    <label class="chip"><input type="checkbox" id="t-${i}" value="${t}"${i === 0 ? " checked" : ""}><span>${t}</span></label>`).join("");
+
+  function buildMessage() {
+    const name = $("#f-name").value.trim();
+    const type = TYPES.find((t) => t.id === sel.value);
+    const who = $("#f-who").value;
+    const times = [...document.querySelectorAll("#f-times input:checked")].map((i) => i.value.toLowerCase());
+    const notes = $("#f-notes").value.trim();
+    const greet = `Hi ${CONFIG.name}, this is ${name || "[your name]"}.`;
+    const ask = `I'd like to schedule a ${type.title.toLowerCase()}${who ? " " + who : ""}.`;
+    const when = times.length
+      ? (times.includes("anytime") ? "I'm flexible on timing." : `${cap(listify(times))} works best for me.`)
+      : "";
+    return [greet, ask, when, notes].filter(Boolean).join(" ") + "\n\nThanks!";
+  }
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+  const listify = (a) => a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " or " + a[a.length - 1];
+
+  function sync() {
+    const msg = buildMessage();
+    $("#msg").textContent = msg;
+    const num = CONFIG.phone.replace(/[^\d+]/g, "");
+    $("#sms-link").href = `sms:${num}?&body=${encodeURIComponent(msg)}`;
+    grid.querySelectorAll(".type").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.id === sel.value)));
+    $("#copy-status").textContent = "";
+  }
+  $("#req-form").addEventListener("input", sync);
+  $("#req-form").addEventListener("change", sync);
+  $("#req-form").addEventListener("submit", (e) => e.preventDefault());
+
+  async function copyText(text, el, statusEl) {
+    try {
+      await navigator.clipboard.writeText(text);
+      if (statusEl) statusEl.textContent = "Copied. Paste it into a text.";
+      else { const o = el.textContent; el.textContent = "Copied"; setTimeout(() => (el.textContent = o), 1500); }
+    } catch {
+      const target = statusEl ? $("#msg") : el.previousElementSibling.querySelector(".v");
+      const r = document.createRange(); r.selectNodeContents(target);
+      const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+      if (statusEl) statusEl.textContent = "Text selected. Press Ctrl+C or ⌘C to copy.";
+    }
+  }
+  $("#copy-msg").addEventListener("click", (e) => copyText(buildMessage(), e.currentTarget, $("#copy-status")));
+  document.querySelectorAll("[data-copy]").forEach((b) =>
+    b.addEventListener("click", () => copyText(CONFIG[b.dataset.copy], b)));
+
+  sync();
+</script>
+</body>
+</html>
